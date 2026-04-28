@@ -1,0 +1,133 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ── 暗色主题（默认） ── */
+:root {
+  --bg-base:       #0d0d0d;
+  --bg-header:     #111111;
+  --bg-editor:     #141414;
+  --bg-toolbar:    #0f0f0f;
+  --bg-linenums:   #0f0f0f;
+  --bg-statusbar:  #0a0a0a;
+  --bg-preview:    #181818;
+
+  --border:        #272727;
+  --border-subtle: #1f1f1f;
+
+  --text-primary:  #d4d4d4;
+  --text-editor:   #c8c8c8;
+  --text-muted:    #555555;
+  --text-faint:    #333333;
+
+  --btn-ghost-border:      #323232;
+  --btn-ghost-color:       #999999;
+  --btn-ghost-hover-bg:    #1e1e1e;
+  --btn-ghost-hover-border:#444444;
+  --btn-ghost-hover-color: #d0d0d0;
+
+  --toolbar-icon:       #5a5a5a;
+  --toolbar-hover-bg:   #1e1e1e;
+  --toolbar-hover-color:#b0b0b0;
+  --toolbar-active-bg:  #2a2a2a;
+
+  --resize-bg:           #1a1a1a;
+  --resize-grip:         rgba(255,255,255,0.08);
+  --resize-grip-active:  rgba(255,255,255,0.35);
+
+  --preview-header-bg:   #0f0f0f;
+  --preview-label-color: #444444;
+
+  --scrollbar-thumb:       #2e2e2e;
+  --scrollbar-thumb-hover: #484848;
+
+  --accent:       #4a86c8;
+  --accent-hover: #5a96d8;
+  --accent-dim:   #3a76b8;
+}
+
+/* ── 亮色主题 ── */
+[data-theme="light"] {
+  --bg-base:       #f0f2f5;
+  --bg-header:     #ffffff;
+  --bg-editor:     #fafafa;
+  --bg-toolbar:    #f4f4f6;
+  --bg-linenums:   #efefef;
+  --bg-statusbar:  #e8e8ea;
+  --bg-preview:    #e4e6ea;
+
+  --border:        #dcdcdc;
+  --border-subtle: #e8e8e8;
+
+  --text-primary:  #1a1a1a;
+  --text-editor:   #2a2a2a;
+  --text-muted:    #888888;
+  --text-faint:    #bbbbbb;
+
+  --btn-ghost-border:      #d0d0d0;
+  --btn-ghost-color:       #555555;
+  --btn-ghost-hover-bg:    #ebebeb;
+  --btn-ghost-hover-border:#b8b8b8;
+  --btn-ghost-hover-color: #1a1a1a;
+
+  --toolbar-icon:       #888888;
+  --toolbar-hover-bg:   #e8e8ea;
+  --toolbar-hover-color:#222222;
+  --toolbar-active-bg:  #d8d8da;
+
+  --resize-bg:           #d4d4d6;
+  --resize-grip:         rgba(0,0,0,0.12);
+  --resize-grip-active:  rgba(0,0,0,0.4);
+
+  --preview-header-bg:   #f4f4f6;
+  --preview-label-color: #aaaaaa;
+
+  --scrollbar-thumb:       #c8c8c8;
+  --scrollbar-thumb-hover: #aaaaaa;
+
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-dim:   #1e55cc;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  transition: background 0.25s, color 0.25s;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, textarea {
+  font-family: inherit;
+}
