@@ -1,6 +1,74 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
 
+// ── Markdown 语法高亮 ──────────────────────────────────────────────
+const escHtml = (s) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+const sp = (cls, text) => `<span class="${cls}">${text}</span>`
+
+const applyInline = (line) => {
+  // 粗斜体 ***
+  line = line.replace(/(\*{3})((?:[^*]|\*(?!\*\*))+?)(\*{3})/g,
+    (_, a, m, b) => sp('hl-mark', a) + sp('hl-bold hl-italic', m) + sp('hl-mark', b))
+  // 粗体 ** / __
+  line = line.replace(/(\*{2}|_{2})((?:[^*_\n])+?)(\*{2}|_{2})/g,
+    (_, a, m, b) => sp('hl-mark', a) + sp('hl-bold', m) + sp('hl-mark', b))
+  // 斜体 * / _
+  line = line.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g,
+    (_, m) => sp('hl-mark', '*') + sp('hl-italic', m) + sp('hl-mark', '*'))
+  // 删除线 ~~
+  line = line.replace(/(~~)((?:[^~]|~(?!~))+?)(~~)/g,
+    (_, a, m, b) => sp('hl-mark', a) + sp('hl-strike', m) + sp('hl-mark', b))
+  // 图片 / 链接 ![](url) [](url)
+  line = line.replace(/(!\[|\[)([^\]]*?)(\]\()([^)]*?)(\))/g,
+    (_, a, lt, c, url, e) =>
+      sp('hl-mark', a) + sp('hl-link-text', lt) + sp('hl-mark', c) + sp('hl-link-url', url) + sp('hl-mark', e))
+  // 行内代码 `code`
+  line = line.replace(/(`+)([^`]*?)(`+)/g,
+    (_, a, m, b) => sp('hl-code-mark', a) + sp('hl-code', m) + sp('hl-code-mark', b))
+  return line
+}
+
+const highlightMarkdown = (text) => {
+  if (!text) return ''
+  const lines = escHtml(text).split('\n')
+  let inFence = false
+  return lines.map((line) => {
+    // 代码围栏开合
+    const fenceMatch = line.match(/^(```)([\w-]*)(.*)$/)
+    if (fenceMatch) {
+      inFence = !inFence
+      return sp('hl-fence-mark', fenceMatch[1] + fenceMatch[2]) + fenceMatch[3]
+    }
+    if (inFence) return sp('hl-fence-body', line)
+
+    // 标题
+    const hm = line.match(/^(#{1,6})([ \t].*)$/)
+    if (hm) return sp('hl-heading-mark', hm[1]) + sp('hl-heading', applyInline(hm[2]))
+
+    // 分隔线 --- / *** / ___
+    if (/^[ \t]*([-*_][ \t]*){3,}$/.test(line)) return sp('hl-hr', line)
+
+    // 引用 >（转义后 &gt;）
+    if (/^[ \t]*&gt;/.test(line)) {
+      return line.replace(/^([ \t]*&gt;)(.*)/, (_, q, rest) =>
+        sp('hl-quote-mark', q) + sp('hl-quote', applyInline(rest)))
+    }
+
+    // 有序列表
+    const ol = line.match(/^([ \t]*)(\d+\.)( .*)$/)
+    if (ol) return ol[1] + sp('hl-list-mark', ol[2]) + applyInline(ol[3])
+
+    // 无序列表
+    const ul = line.match(/^([ \t]*)([-*+])( .*)$/)
+    if (ul) return ul[1] + sp('hl-list-mark', ul[2]) + applyInline(ul[3])
+
+    return applyInline(line)
+  }).join('\n')
+}
+// ─────────────────────────────────────────────────────────────────
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -11,6 +79,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const textareaRef = ref(null)
+const highlightLayerRef = ref(null)
 
 const content = computed({
   get: () => props.modelValue,
@@ -20,6 +89,8 @@ const content = computed({
 const lineCount = computed(() => {
   return (content.value || '').split('\n').length
 })
+
+const highlightedContent = computed(() => highlightMarkdown(content.value))
 
 const wrapSelection = (before, after = '') => {
   const el = textareaRef.value
@@ -195,8 +266,12 @@ const handleKeydown = (e) => {
   }
 }
 
-const syncScroll = (e) => {
-  // 可选：同步滚动
+const syncScroll = () => {
+  const ta = textareaRef.value
+  const hl = highlightLayerRef.value
+  if (!ta || !hl) return
+  hl.scrollTop = ta.scrollTop
+  hl.scrollLeft = ta.scrollLeft
 }
 </script>
 
@@ -306,15 +381,23 @@ const syncScroll = (e) => {
       <div class="line-numbers" aria-hidden="true">
         <div v-for="n in lineCount" :key="n" class="line-number">{{ n }}</div>
       </div>
-      <textarea
-        ref="textareaRef"
-        class="editor-textarea"
-        v-model="content"
-        @keydown="handleKeydown"
-        @scroll="syncScroll"
-        spellcheck="false"
-        placeholder="在此输入 Markdown 内容..."
-      ></textarea>
+      <div class="editor-content">
+        <div
+          ref="highlightLayerRef"
+          class="highlight-layer"
+          v-html="highlightedContent"
+          aria-hidden="true"
+        ></div>
+        <textarea
+          ref="textareaRef"
+          class="editor-textarea"
+          v-model="content"
+          @keydown="handleKeydown"
+          @scroll="syncScroll"
+          spellcheck="false"
+          placeholder="在此输入 Markdown 内容..."
+        ></textarea>
+      </div>
     </div>
 
     <div class="editor-statusbar">
@@ -414,11 +497,40 @@ const syncScroll = (e) => {
   padding-right: 10px;
 }
 
-.editor-textarea {
+/* 编辑区容器（相对定位，用于叠加层） */
+.editor-content {
   flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* 语法高亮叠加层 */
+.highlight-layer {
+  position: absolute;
+  inset: 0;
+  padding: 14px 16px;
+  font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+  font-size: 13.5px;
+  line-height: 21px;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--text-editor);
+  word-break: normal;
+  tab-size: 2;
+  margin: 0;
+  border: none;
+}
+
+/* textarea 透明覆盖在高亮层上方 */
+.editor-textarea {
+  position: absolute;
+  inset: 0;
   padding: 14px 16px;
   background: transparent;
-  color: var(--text-editor);
+  color: transparent;
+  caret-color: var(--text-editor);
   border: none;
   outline: none;
   resize: none;
@@ -426,13 +538,20 @@ const syncScroll = (e) => {
   font-size: 13.5px;
   line-height: 21px;
   overflow-y: auto;
-  white-space: pre;
   overflow-x: auto;
+  white-space: pre;
   tab-size: 2;
+  z-index: 1;
 }
 
 .editor-textarea::placeholder {
   color: var(--text-faint);
+}
+
+/* 选区高亮（半透明使高亮层可见） */
+.editor-textarea::selection {
+  background: rgba(100, 150, 220, 0.35);
+  color: transparent;
 }
 
 .editor-statusbar {
@@ -446,4 +565,24 @@ const syncScroll = (e) => {
   color: var(--text-muted);
   flex-shrink: 0;
 }
+</style>
+
+<style>
+/* 高亮层语法颜色（非 scoped，作用于 v-html 渲染内容） */
+.hl-heading-mark { color: var(--hl-heading-mark); font-weight: 700; }
+.hl-heading      { color: var(--hl-heading); font-weight: 600; }
+.hl-mark         { color: var(--hl-mark); }
+.hl-bold         { color: var(--hl-bold); font-weight: 700; }
+.hl-italic       { color: var(--hl-italic); font-style: italic; }
+.hl-strike       { color: var(--hl-strike); text-decoration: line-through; }
+.hl-code         { color: var(--hl-code); }
+.hl-code-mark    { color: var(--hl-code-mark); }
+.hl-link-text    { color: var(--hl-link-text); }
+.hl-link-url     { color: var(--hl-link-url); }
+.hl-quote-mark   { color: var(--hl-quote-mark); font-weight: 600; }
+.hl-quote        { color: var(--hl-quote); }
+.hl-list-mark    { color: var(--hl-list-mark); font-weight: 600; }
+.hl-hr           { color: var(--hl-hr); }
+.hl-fence-mark   { color: var(--hl-fence-mark); font-weight: 600; }
+.hl-fence-body   { color: var(--hl-fence-body); }
 </style>

@@ -12,6 +12,23 @@ html, body, #app {
 
 /* ── 暗色主题（默认） ── */
 :root {
+  /* 编辑器语法高亮 */
+  --hl-heading-mark: #e8b84b;
+  --hl-heading:      #9bb5d8;
+  --hl-mark:         #3d3d3d;
+  --hl-bold:         #d4d4d4;
+  --hl-italic:       #c0bdb0;
+  --hl-strike:       #555555;
+  --hl-code:         #ce9178;
+  --hl-code-mark:    #569cd6;
+  --hl-link-text:    #4fc1ff;
+  --hl-link-url:     #6a9955;
+  --hl-quote-mark:   #6a9955;
+  --hl-quote:        #777777;
+  --hl-list-mark:    #c586c0;
+  --hl-hr:           #3a3a3a;
+  --hl-fence-mark:   #569cd6;
+  --hl-fence-body:   #707070;
   --bg-base:       #0d0d0d;
   --bg-header:     #111111;
   --bg-editor:     #141414;
@@ -56,6 +73,23 @@ html, body, #app {
 
 /* ── 亮色主题 ── */
 [data-theme="light"] {
+  /* 编辑器语法高亮 */
+  --hl-heading-mark: #af00db;
+  --hl-heading:      #001080;
+  --hl-mark:         #c0c0c0;
+  --hl-bold:         #1a1a1a;
+  --hl-italic:       #444444;
+  --hl-strike:       #aaaaaa;
+  --hl-code:         #a31515;
+  --hl-code-mark:    #0070c1;
+  --hl-link-text:    #098658;
+  --hl-link-url:     #0451a5;
+  --hl-quote-mark:   #008000;
+  --hl-quote:        #666666;
+  --hl-list-mark:    #af00db;
+  --hl-hr:           #cccccc;
+  --hl-fence-mark:   #0070c1;
+  --hl-fence-body:   #777777;
   --bg-base:       #f0f2f5;
   --bg-header:     #ffffff;
   --bg-editor:     #fafafa;
