@@ -14,7 +14,7 @@ const initTheme = () => {
 }
 import MarkdownEditor from './components/MarkdownEditor.vue'
 import MarkdownPreview from './components/MarkdownPreview.vue'
-import defaultContent from '../CV.md?raw'
+import defaultContent from '../CV_optimized.md?raw'
 
 const content = ref(defaultContent)
 const previewRef = ref(null)
@@ -102,9 +102,13 @@ const handleExportPDF = async () => {
     if (!element) return
 
     const opt = {
-      margin: [8, 8, 8, 8],
+      margin: [5, 5, 5, 5],
       filename: 'resume.pdf',
       image: { type: 'jpeg', quality: 0.98 },
+      pagebreak: {
+        mode: ['css', 'legacy'],
+        avoid: ['p', 'li', 'tr', 'table', 'h1', 'h2', 'h3', 'blockquote', 'pre'],
+      },
       html2canvas: {
         scale: 2,
         useCORS: true,

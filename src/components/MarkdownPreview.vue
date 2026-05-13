@@ -106,54 +106,85 @@ defineExpose({ getPreviewElement })
 }
 
 .preview-content {
-  padding: 40px 48px;
+  padding: 22px 30px;
   color: #333;
   font-family: 'Microsoft YaHei', 'Arial', sans-serif;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.34;
 }
 </style>
 
 <style>
 /* 全局预览内容样式（非 scoped，用于渲染 v-html 内容） */
+.preview-content > div[style] {
+  max-width: none !important;
+  padding: 8px 10px !important;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content p,
+.preview-content li,
+.preview-content blockquote,
+.preview-content pre,
+.preview-content table,
+.preview-content tr,
+.preview-content img {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.preview-content > div[style] > table:first-child {
+  padding-bottom: 6px !important;
+  margin-bottom: 8px !important;
+}
+
 .preview-content h1 {
-  font-size: 24px;
+  font-size: 20px !important;
   font-weight: 700;
   color: #1a1a2e;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
+  margin: 0 0 6px 0 !important;
+  padding-bottom: 4px;
   border-bottom: 2px solid #4a86c8;
 }
 
 .preview-content h2 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #4a86c8;
-  margin: 20px 0 10px 0;
-  padding-bottom: 4px;
+  margin: 10px 0 5px 0;
+  padding-bottom: 2px;
   border-bottom: 1px solid #e0e8f5;
 }
 
 .preview-content h3 {
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #2a4a7a;
-  margin: 14px 0 6px 0;
+  margin: 8px 0 3px 0;
 }
 
 .preview-content p {
-  margin: 6px 0;
+  margin: 2px 0;
   color: #333;
 }
 
 .preview-content ul,
 .preview-content ol {
-  margin: 6px 0;
-  padding-left: 24px;
+  margin: 3px 0;
+  padding-left: 18px;
 }
 
 .preview-content li {
-  margin: 4px 0;
+  margin: 1px 0;
   color: #444;
 }
 
@@ -177,8 +208,8 @@ defineExpose({ getPreviewElement })
 }
 
 .preview-content blockquote {
-  margin: 10px 0;
-  padding: 8px 16px;
+  margin: 5px 0;
+  padding: 4px 10px;
   border-left: 3px solid #4a86c8;
   background: #f0f5ff;
   color: #555;
@@ -187,16 +218,16 @@ defineExpose({ getPreviewElement })
 
 .preview-content code {
   font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
-  font-size: 12px;
+  font-size: 11px;
   background: #f0f0f5;
   color: #c7254e;
-  padding: 1px 5px;
+  padding: 0 4px;
   border-radius: 3px;
 }
 
 .preview-content pre {
-  margin: 10px 0;
-  padding: 14px 16px;
+  margin: 5px 0;
+  padding: 8px 10px;
   background: #1e1e2e;
   border-radius: 6px;
   overflow-x: auto;
@@ -206,14 +237,14 @@ defineExpose({ getPreviewElement })
   background: transparent;
   color: #abb2bf;
   padding: 0;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .preview-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 10px 0;
-  font-size: 13px;
+  margin: 5px 0;
+  font-size: 11.5px;
 }
 
 .preview-content th {
@@ -221,12 +252,12 @@ defineExpose({ getPreviewElement })
   color: #2a4a7a;
   font-weight: 600;
   text-align: left;
-  padding: 8px 12px;
+  padding: 4px 7px;
   border: 1px solid #d5e0f0;
 }
 
 .preview-content td {
-  padding: 6px 12px;
+  padding: 3px 7px;
   border: 1px solid #e0e8f5;
   color: #444;
   vertical-align: top;
@@ -238,13 +269,30 @@ defineExpose({ getPreviewElement })
 
 .preview-content hr {
   border: none;
-  border-top: 1.5px solid #dde6f0;
-  margin: 16px 0;
+  border-top: 1px solid #dde6f0;
+  margin: 8px 0;
 }
 
 .preview-content img {
   max-width: 100%;
   border-radius: 4px;
+}
+
+.preview-content [style*="margin: 4px 0"] {
+  margin: 1px 0 !important;
+}
+
+.preview-content [style*="width:100px"][style*="height:120px"] {
+  width: 65px !important;
+  height: 98px !important;
+}
+
+.preview-content img[alt="证件照"] {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
 }
 
 /* highlight.js 基础主题 */
