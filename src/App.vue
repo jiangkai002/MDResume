@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 
 const isDark = ref(true)
 const toggleTheme = () => {
@@ -22,6 +22,11 @@ const layoutRef = ref(null)
 const editorWidth = ref(50)
 const isResizing = ref(false)
 const isExporting = ref(false)
+const isPreviewVisible = ref(true)
+
+const togglePreview = () => {
+  isPreviewVisible.value = !isPreviewVisible.value
+}
 
 const startResize = (e) => {
   isResizing.value = true
@@ -83,9 +88,15 @@ const handleExportMD = () => {
 
 const handleExportPDF = async () => {
   if (isExporting.value) return
+  const shouldRestoreHiddenPreview = !isPreviewVisible.value
   isExporting.value = true
 
   try {
+    if (shouldRestoreHiddenPreview) {
+      isPreviewVisible.value = true
+      await nextTick()
+    }
+
     const { default: html2pdf } = await import('html2pdf.js')
     const element = previewRef.value?.getPreviewElement()
     if (!element) return
@@ -105,6 +116,9 @@ const handleExportPDF = async () => {
 
     await html2pdf().set(opt).from(element).save()
   } finally {
+    if (shouldRestoreHiddenPreview) {
+      isPreviewVisible.value = false
+    }
     isExporting.value = false
   }
 }
@@ -140,6 +154,24 @@ const handleExportPDF = async () => {
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
+        </button>
+        <button
+          class="btn btn-ghost"
+          :class="{ active: isPreviewVisible }"
+          @click="togglePreview"
+          :title="isPreviewVisible ? '隐藏预览' : '显示预览'"
+        >
+          <svg v-if="isPreviewVisible" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.29 20.29 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A10.45 10.45 0 0 1 12 4c7 0 11 8 11 8a20.74 20.74 0 0 1-2.16 3.19"/>
+            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+          {{ isPreviewVisible ? '隐藏预览' : '显示预览' }}
         </button>
         <div class="header-divider"></div>
         <button class="btn btn-ghost" @click="handleImport" title="导入 Markdown 文件">
@@ -177,11 +209,12 @@ const handleExportPDF = async () => {
     </header>
 
     <div class="editor-layout" ref="layoutRef">
-      <div class="pane editor-pane" :style="{ width: editorWidth + '%' }">
+      <div class="pane editor-pane" :style="{ width: isPreviewVisible ? editorWidth + '%' : '100%' }">
         <MarkdownEditor v-model="content" />
       </div>
 
       <div
+        v-if="isPreviewVisible"
         class="resize-handle"
         :class="{ active: isResizing }"
         @mousedown="startResize"
@@ -189,7 +222,7 @@ const handleExportPDF = async () => {
         <div class="resize-grip"></div>
       </div>
 
-      <div class="pane preview-pane" :style="{ flex: 1 }">
+      <div v-show="isPreviewVisible" class="pane preview-pane" :style="{ flex: 1 }">
         <MarkdownPreview :content="content" ref="previewRef" />
       </div>
     </div>
@@ -302,6 +335,12 @@ const handleExportPDF = async () => {
   background: var(--btn-ghost-hover-bg);
   border-color: var(--btn-ghost-hover-border);
   color: var(--btn-ghost-hover-color);
+}
+
+.btn-ghost.active {
+  background: var(--btn-ghost-hover-bg);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .btn-primary {
